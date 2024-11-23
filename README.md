@@ -54,3 +54,4 @@ Scheme: Button on matrix (GPIO_Column, GPIO_Row) - action
 
 The connected buttons that are empty for actions can be used to extend the functionality, 
 for example, to pause the game.  
+
