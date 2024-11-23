@@ -22,58 +22,35 @@ pip install RPLCD
 pip install smbus2
 ```
 
-## Gameplay (from original author)
-
-http://www.youtube.com/watch?feature=player_embedded&v=G4lIUJDdov0
-
 ## How to play
 
-just use the buttons in the connection to move the stickman if you don't know what do the terminal will say what to do.
-
-play with maximum contrast for a better experience
+Just use the corner buttons on the matrix to move the stickman. 
+Adjust the contrast using a potentiometer (relevant for owners of I2C adapter for LCD)
 
 
 ## GPIO Pins
 
 ### LCD
 
-We use I2C interface.
+I use I2C interface.
 
-- ...
-- ...
-- ...
-- ...
+Scheme: RPi - I2C LCD Module
+- 5V - VCC
+- GND - GND
+- Pin 3 (GPIO 2) - SDA
+- Pin 5 (GPIO 3) - SLC
 
 ### Buttons
 
-4x4 matrix, but we use only 4 buttons.
+4x4 matrix, but I use only 4 corner buttons.
 
-I connected 8 pin to: gpio 16, 20, 21, 5, 6, 13, 19, 26
+I connected 8 pin to gpio: 16, 20, 21, 5, 6, 13, 19, 26.
 
-- S1 - UP: 
-- S4 - RIGHT: 
-- S13 - LEFT: 
-- S16 - DOWN: 
+Scheme: Button on matrix (GPIO_Column, GPIO_Row) - action
+- S1 (5, 6) - Move Up: 
+- S4 (16, 6) - Move Right: 
+- S13 (5, 26) - Move Left: 
+- S16 (16, 26) - Move Down: 
 
-
-## Solving problems
-
-```
-First it said command 'pip' not found, so I typed
-
-sudo apt install python-pip
-
-then it said
-
-E: Unable to locate package python-pip
-```
-
-Identify the highest version of python listed. If the highest version is something like python2.7 then install 
-python2-pip If its something like python3.8 then install python3-pip.
-
-For example, if some guide says to install python-smbus, install python3-smbus.
-
----
-
-```python3 -m pip install``
-
+The connected buttons that are empty for actions can be used to extend the functionality, 
+for example, to pause the game.  
