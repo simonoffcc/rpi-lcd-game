@@ -1,5 +1,4 @@
 from RPLCD.i2c import CharLCD
-
 from time import sleep
 
 
