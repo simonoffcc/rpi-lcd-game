@@ -59,8 +59,9 @@ Scheme: Button on matrix (GPIO_Column, GPIO_Row) - action
 - S16 (16, 26) - Move Down: 
 
 The connected buttons that are empty for actions can be used to extend the functionality, 
-for example, to pause the game.  
+for example, to pause the game.
 
+If you lose, the script stops.
 
 ## Demonstration
 
