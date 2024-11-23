@@ -141,6 +141,9 @@ def main():
 
         time.sleep(speed)
         lcd.clear()
+        # Обновление счета на экране
+        lcd.cursor_pos = (0, 12)
+        lcd.write_string(f'{score:04}')
         player.update()
         for obstacle in obstacles:
             obstacle.update()
