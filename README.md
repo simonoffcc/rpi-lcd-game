@@ -24,8 +24,10 @@ pip install smbus2
 
 ## How to play
 
+```python src/game.py```
+
 Just use the corner buttons on the matrix to move the stickman. 
-Adjust the contrast using a potentiometer (relevant for owners of I2C adapter for LCD)
+Adjust the contrast using a potentiometer (relevant for owners of I2C adapter for LCD).
 
 
 ## GPIO Pins
@@ -42,9 +44,10 @@ Scheme: RPi - I2C LCD Module
 
 ### Buttons
 
-4x4 matrix, but I use only 4 corner buttons.
+I use matrix keyboard 4x4 (16 buttons), but I use only 4 corner buttons for 4 actions.
 
-I connected 8 pin to gpio: 16, 20, 21, 5, 6, 13, 19, 26.
+I connected 8 pin to gpio: 
+C4, C3, C2, C1, R1, R2, R3, R4 -> 16, 20, 21, 5, 6, 13, 19, 26
 
 Scheme: Button on matrix (GPIO_Column, GPIO_Row) - action
 - S1 (5, 6) - Move Up: 
