@@ -1,17 +1,32 @@
+## Used machine
+
+Raspberry Pi 3 model B+
+
+```uname -a```
+
+Linux rpi 6.6.51+rpt-rpi-v8 #1 SMP PREEMPT Debian 1:6.6.51-1+rpt3 (2024-10-08) aarch64 GNU/Linux
+
+
 ## Dependencies 
 
+RPLCD, smbus2
+
+My raspbian system already has all the necessary I2C and GPIO libraries, so if you have a different version of linux, 
+google what extra you need to install.
+
 ```
-sudo apt-get update
-sudo pip install RPLCD
-sudo apt-get install python3-gpiozero python3-rpi.gpio
+python3 -m venv env
+source env/bin/activate
+pip install RPi.GPIO
+pip install RPLCD
+pip install smbus2
 ```
 
-# GAMEPLAY
+## Gameplay (from original author)
 
-<a href="http://www.youtube.com/watch?feature=player_embedded&v=G4lIUJDdov0" target="_blank"><img src="http://img.youtube.com/vi/G4lIUJDdov0/0.jpg" 
-alt="" width="240" height="180" border="10" /></a> <--- press here
+http://www.youtube.com/watch?feature=player_embedded&v=G4lIUJDdov0
 
-# HOW TO PLAY
+## How to play
 
 just use the buttons in the connection to move the stickman if you don't know what do the terminal will say what to do.
 

@@ -6,15 +6,20 @@ import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
 Hol = 0.2
-down = Button(26,hold_repeat=True,hold_time=Hol)
-up = Button(8,hold_repeat=True,hold_time=Hol)
-left = Button(7,hold_repeat=True,hold_time=Hol)
-right = Button(1,hold_repeat=True,hold_time=Hol)
+down = Button(26, hold_repeat=True, hold_time=Hol)
+up = Button(8, hold_repeat=True, hold_time=Hol)
+left = Button(7, hold_repeat=True, hold_time=Hol)
+right = Button(1, hold_repeat=True, hold_time=Hol)
 
-lcd = CharLCD(cols=16, rows=2, pin_rs=4, pin_e=17, pins_data=[19,5,6,13,18, 22, 23, 24],
-              numbering_mode=GPIO.BCM,
+# lcd = CharLCD(cols=16, rows=2, pin_rs=4, pin_e=17, pins_data=[19, 5, 6, 13, 18, 22, 23, 24],
+#               numbering_mode=GPIO.BCM,
+#               auto_linebreaks=True,
+#               pin_backlight=None, backlight_enabled=True,compat_mode=True)
+lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
+              cols=16, rows=2, dotsize=8,
+              charmap='A02',
               auto_linebreaks=True,
-              pin_backlight=None, backlight_enabled=True,compat_mode=True)
+              backlight_enabled=True)
 lcd.clear()
 
 warnings.simplefilter("ignore")
