@@ -9,17 +9,20 @@ Linux rpi 6.6.51+rpt-rpi-v8 #1 SMP PREEMPT Debian 1:6.6.51-1+rpt3 (2024-10-08) a
 
 ## Dependencies 
 
-RPLCD, smbus2
+RPi.GPIO, RPLCD, smbus2
 
 My raspbian system already has all the necessary I2C and GPIO libraries, so if you have a different version of linux, 
 google what extra you need to install.
 
+You should use virtual environment to prevent unforeseen errors.
 ```
 python3 -m venv env
 source env/bin/activate
-pip install RPi.GPIO
-pip install RPLCD
-pip install smbus2
+```
+
+Then just install dependencies:
+```
+pip install -r requirements.txt
 ```
 
 ## How to play
