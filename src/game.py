@@ -41,7 +41,7 @@ lcd.create_char(2, obstacle)
 # Настройка матричной клавиатуры
 KEYPAD = [
     ["up", None, None, "right"],
-    [None, None, None, None],
+    [None, None, "pause", None],
     [None, None, None, None],
     ["left", None, None, "down"]
 ]
@@ -90,13 +90,13 @@ class Player:
             self.y += 1
         elif direction == 'left' and self.x > 0:
             self.x -= 1
-        elif direction == 'right' and self.x < 15:
+        elif direction == 'right' and self.x < 12:
             self.x += 1
         self.update()
 
 # Класс препятствия
 class Obstacle:
-    def __init__(self, x=15):
+    def __init__(self, x=12):
         self.x = x
         self.y = random.randint(0, 1)
 
@@ -111,46 +111,81 @@ class Obstacle:
         self.update()
 
 # Основной игровой цикл
-def main():
+def game(best_score):
     player = Player()
     obstacles = []
     game_over = False
     score = 0
-    speed = 0.8
-    last_obstacle_x = 15
+    speed = 0.7
+    last_obstacle_x = 12
+    paused = False
 
     while not game_over:
         key = get_key()
         if key:
-            player.move(key)
+            if key == 'pause':
+                paused = not paused
+                if paused:
+                    lcd.cursor_pos = (0, 0)
+                    lcd.write_string('Paused')
+                else:
+                    lcd.clear()
+                    player.update()
+                    for obstacle in obstacles:
+                        obstacle.update()
+                    lcd.cursor_pos = (0, 13)
+                    lcd.write_string(f'{score:03}')
+                    lcd.cursor_pos = (1, 13)
+                    lcd.write_string(f'{best_score:03}')
+                continue
+            if not paused:
+                player.move(key)
 
-        # Добавление новых препятствий с проверкой расстояния
-        if random.random() < 0.1 and (len(obstacles) == 0 or last_obstacle_x - obstacles[-1].x >= 2):
-            new_obstacle = Obstacle()
-            obstacles.append(new_obstacle)
-            last_obstacle_x = new_obstacle.x
+        if not paused:
+            # Добавление новых препятствий с проверкой расстояния
+            if random.random() < 0.1 and (len(obstacles) == 0 or last_obstacle_x - obstacles[-1].x >= 3):
+                new_obstacle = Obstacle()
+                obstacles.append(new_obstacle)
+                last_obstacle_x = new_obstacle.x
 
-        # Обновление состояния препятствий
-        for obstacle in obstacles:
-            obstacle.move()
-            if obstacle.x == 0:
-                obstacles.remove(obstacle)
-                score += 1
-            if obstacle.x == player.x and obstacle.y == player.y:
-                game_over = True
+            # Обновление состояния препятствий
+            for obstacle in obstacles:
+                obstacle.move()
+                if obstacle.x == 0:
+                    obstacles.remove(obstacle)
+                    score += 1
+                if obstacle.x == player.x and obstacle.y == player.y:
+                    game_over = True
 
-        time.sleep(speed)
-        lcd.clear()
-        # Обновление счета на экране
-        lcd.cursor_pos = (0, 12)
-        lcd.write_string(f'{score:04}')
-        player.update()
-        for obstacle in obstacles:
-            obstacle.update()
+            time.sleep(speed)
+            lcd.clear()
+            # Обновление счета на экране
+            lcd.cursor_pos = (0, 13)
+            lcd.write_string(f'{score:03}')
+            lcd.cursor_pos = (1, 13)
+            lcd.write_string(f'{best_score:03}')
+            player.update()
+            for obstacle in obstacles:
+                obstacle.update()
 
     lcd.clear()
-    lcd.write_string(f'Game Over!\r\nScore: {score}')
+    if score > best_score:
+        best_score = score
+        lcd.write_string(f'New Record!\r\nScore: {score}')
+    else:
+        lcd.write_string(f'Game Over!\r\nScore: {score}')
     time.sleep(3)
+    return best_score
+
+def main():
+    best_score = 0
+    while True:
+        best_score = game(best_score)
+        lcd.clear()
+        lcd.write_string('Press any key\r\nto restart')
+        while not get_key():
+            time.sleep(0.1)
+        lcd.clear()
 
 try:
     main()
