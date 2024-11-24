@@ -1,4 +1,4 @@
-## Used machine
+## Configuration
 
 Microcontroller: Raspberry Pi 3 model B+
 
