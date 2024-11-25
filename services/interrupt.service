@@ -1,0 +1,11 @@
+[Unit]
+Description=RPi LCD game Service
+
+[Service]
+Type=idle
+User=simon
+ExecStart=/home/simon/rpi-lcd-game/env/bin/python /home/simon/rpi-lcd-game/src/interruption.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

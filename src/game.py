@@ -1,7 +1,6 @@
 import time
 import random
 import threading
-import subprocess
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
@@ -83,7 +82,6 @@ def get_key():
         GPIO.output(col_pin, GPIO.HIGH)
     return key
 
-
 class Player:
     def __init__(self):
         self.x = 2
@@ -107,7 +105,6 @@ class Player:
             self.x += 1
         self.update()
 
-
 class Obstacle:
     def __init__(self, x=12):
         self.x = x
@@ -124,8 +121,7 @@ class Obstacle:
         self.x -= 1
         self.update()
 
-
-def game(best_score):
+def game(best_score, pause_event):
     player = Player()
     obstacles = []
     game_over = False
@@ -172,11 +168,20 @@ def game(best_score):
                         obstacle.update()
                     display_status()
                 continue
-            if key == 'down':  # Используйте любую свободную клавишу для вывода смайлика
-                subprocess.run(["systemctl", "start", "smiley.service"])
-                continue
             if not paused:
                 player.move(key)
+
+        if pause_event.is_set():
+            paused = True
+            lcd.cursor_pos = (0, 0)
+            lcd.write_string('Paused\r\nby Service')
+        else:
+            paused = False
+            lcd.clear()
+            player.update()
+            for obstacle in obstacles:
+                obstacle.update()
+            display_status()
 
         if not paused:
             if random.random() < 0.1 and (len(obstacles) == 0 or last_obstacle_x - obstacles[-1].x >= 2):
@@ -220,8 +225,22 @@ def game(best_score):
 
 def main():
     best_score = 0
+    pause_event = threading.Event()
+
+    def monitor_pause_event():
+        with open('/tmp/game_interrupt', 'r') as f:
+            while True:
+                status = f.read().strip()
+                if status == 'interrupt':
+                    pause_event.set()
+                else:
+                    pause_event.clear()
+                time.sleep(0.5)
+
+    threading.Thread(target=monitor_pause_event, daemon=True).start()
+
     while True:
-        best_score = game(best_score)
+        best_score = game(best_score, pause_event)
         lcd.clear()
         lcd.write_string('Press any key\r\nto restart')
         while not get_key():
