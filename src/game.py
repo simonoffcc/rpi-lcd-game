@@ -1,12 +1,11 @@
 import time
 import random
-import subprocess
+import threading
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
 GPIO.setwarnings(False)
 
-# Инициализация дисплея
 lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
               cols=16, rows=2, dotsize=8,
               charmap='A02',
@@ -69,7 +68,6 @@ for col_pin in COLS:
     GPIO.setup(col_pin, GPIO.OUT)
     GPIO.output(col_pin, GPIO.HIGH)
 
-
 def get_key():
     key = None
     for col_num, col_pin in enumerate(COLS):
@@ -123,6 +121,12 @@ class Obstacle:
         self.x -= 1
         self.update()
 
+def display_current_time():
+    while True:
+        current_time = time.strftime('%H:%M:%S')
+        lcd.cursor_pos = (0, 8)
+        lcd.write_string(current_time)
+        time.sleep(1)
 
 def game(best_score):
     player = Player()
@@ -171,9 +175,6 @@ def game(best_score):
                         obstacle.update()
                     display_status()
                 continue
-            if key == 'down':  # Используйте любую свободную клавишу для вывода смайлика
-                subprocess.run(["systemctl", "start", "smiley.service"])
-                continue
             if not paused:
                 player.move(key)
 
@@ -215,4 +216,27 @@ def game(best_score):
     else:
         lcd.write_string(f'Game Over!\r\nScore: {score}')
     time.sleep(3)
+    return best_score
 
+def main():
+    best_score = 0
+
+    # Создаем и запускаем поток для отображения текущего времени
+    time_thread = threading.Thread(target=display_current_time)
+    time_thread.daemon = True
+    time_thread.start()
+
+    while True:
+        best_score = game(best_score)
+        lcd.clear()
+        lcd.write_string('Press any key\r\nto restart')
+        while not get_key():
+            time.sleep(0.1)
+        lcd.clear()
+
+try:
+    main()
+except KeyboardInterrupt:
+    lcd.clear()
+    lcd.close(clear=True)
+    GPIO.cleanup()
