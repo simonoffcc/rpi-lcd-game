@@ -1,11 +1,12 @@
 import time
 import random
+import threading
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
 GPIO.setwarnings(False)
 
-
+# Настройка LCD экрана
 lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
               cols=16, rows=2, dotsize=8,
               charmap='A02',
@@ -13,6 +14,7 @@ lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
               backlight_enabled=True)
 lcd.clear()
 
+# Определение персонажей и препятствий
 stickman = (
     0b00100,
     0b01010,
@@ -76,7 +78,7 @@ def get_key():
             if GPIO.input(row_pin) == GPIO.LOW:
                 key = KEYPAD[row_num][col_num]
                 while GPIO.input(row_pin) == GPIO.LOW:
-                    time.sleep(0.05)
+                    time.sleep(0.02)  # Уменьшение времени задержки
         GPIO.output(col_pin, GPIO.HIGH)
     return key
 
@@ -182,7 +184,7 @@ def game(best_score):
 
             for obstacle in obstacles:
                 obstacle.move()
-                if (obstacle.y == 0 and obstacle.x == 0) or (obstacle.y == 1 and obstacle.x == 1):
+                if obstacle.x == 0:
                     obstacles.remove(obstacle)
                     if obstacle.type == 'obstacle':
                         score += 1
