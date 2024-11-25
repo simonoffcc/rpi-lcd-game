@@ -1,6 +1,7 @@
 import time
 import random
 import threading
+import subprocess
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
@@ -170,6 +171,9 @@ def game(best_score):
                     for obstacle in obstacles:
                         obstacle.update()
                     display_status()
+                continue
+            if key == 'down':  # Используйте любую свободную клавишу для вывода смайлика
+                subprocess.run(["systemctl", "start", "smiley.service"])
                 continue
             if not paused:
                 player.move(key)
