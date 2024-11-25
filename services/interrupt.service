@@ -1,5 +1,5 @@
 [Unit]
-Description=RPi LCD game Service
+Description=RPi LCD game intterrupt Service
 
 [Service]
 Type=idle
