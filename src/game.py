@@ -1,12 +1,11 @@
 import time
 import random
-import threading
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
 GPIO.setwarnings(False)
 
-# Настройка LCD экрана
+
 lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
               cols=16, rows=2, dotsize=8,
               charmap='A02',
@@ -14,7 +13,6 @@ lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
               backlight_enabled=True)
 lcd.clear()
 
-# Определение персонажей и препятствий
 stickman = (
     0b00100,
     0b01010,
@@ -82,7 +80,7 @@ def get_key():
         GPIO.output(col_pin, GPIO.HIGH)
     return key
 
-# Класс игрока
+
 class Player:
     def __init__(self):
         self.x = 2
@@ -106,7 +104,7 @@ class Player:
             self.x += 1
         self.update()
 
-# Класс препятствия
+
 class Obstacle:
     def __init__(self, x=12):
         self.x = x
@@ -123,7 +121,7 @@ class Obstacle:
         self.x -= 1
         self.update()
 
-# Основной игровой цикл
+
 def game(best_score):
     player = Player()
     obstacles = []
@@ -182,7 +180,6 @@ def game(best_score):
                 obstacles.append(new_obstacle)
                 last_obstacle_x = new_obstacle.x
 
-            # Обновление состояния препятствий
             for obstacle in obstacles:
                 obstacle.move()
                 if (obstacle.y == 0 and obstacle.x == 0) or (obstacle.y == 1 and obstacle.x == 1):
