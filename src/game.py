@@ -1,6 +1,6 @@
 import time
 import random
-import threading
+import subprocess
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
 
@@ -14,7 +14,6 @@ lcd = CharLCD(i2c_expander='PCF8574', address=0x27, port=1,
               backlight_enabled=True)
 lcd.clear()
 
-# Определение пользовательских символов
 stickman = (
     0b00100,
     0b01010,
@@ -70,7 +69,7 @@ for col_pin in COLS:
     GPIO.setup(col_pin, GPIO.OUT)
     GPIO.output(col_pin, GPIO.HIGH)
 
-# Функция для получения нажатой клавиши
+
 def get_key():
     key = None
     for col_num, col_pin in enumerate(COLS):
@@ -83,7 +82,7 @@ def get_key():
         GPIO.output(col_pin, GPIO.HIGH)
     return key
 
-# Класс игрока
+
 class Player:
     def __init__(self):
         self.x = 2
@@ -107,7 +106,7 @@ class Player:
             self.x += 1
         self.update()
 
-# Класс препятствия
+
 class Obstacle:
     def __init__(self, x=12):
         self.x = x
@@ -124,7 +123,7 @@ class Obstacle:
         self.x -= 1
         self.update()
 
-# Основная игровая функция
+
 def game(best_score):
     player = Player()
     obstacles = []
@@ -144,43 +143,6 @@ def game(best_score):
         lcd.write_string(f'{lives}')
 
     display_status()
-
-    def update_game():
-        nonlocal game_over, score, lives, last_obstacle_x
-        while not game_over:
-            if not paused:
-                if random.random() < 0.1 and (len(obstacles) == 0 or last_obstacle_x - obstacles[-1].x >= 2):
-                    new_obstacle = Obstacle()
-                    if random.random() < 0.2:
-                        new_obstacle.type = 'bonus'
-                    obstacles.append(new_obstacle)
-                    last_obstacle_x = new_obstacle.x
-
-                for obstacle in obstacles:
-                    obstacle.move()
-                    if (obstacle.y == 0 and obstacle.x == 0) or (obstacle.y == 1 and obstacle.x == 1):
-                        obstacles.remove(obstacle)
-                        if obstacle.type == 'obstacle':
-                            score += 1
-                    if obstacle.x == player.x and obstacle.y == player.y:
-                        if obstacle.type == 'bonus':
-                            score += random.randint(2, 5)
-                            obstacles.remove(obstacle)
-                        else:
-                            lives -= 1
-                            obstacles.remove(obstacle)
-                            if lives == 0:
-                                game_over = True
-
-                time.sleep(speed)
-                lcd.clear()
-                display_status()
-                player.update()
-                for obstacle in obstacles:
-                    obstacle.update()
-
-    game_thread = threading.Thread(target=update_game)
-    game_thread.start()
 
     while not game_over:
         key = get_key()
@@ -209,10 +171,43 @@ def game(best_score):
                         obstacle.update()
                     display_status()
                 continue
+            if key == 'down':  # Используйте любую свободную клавишу для вывода смайлика
+                subprocess.run(["systemctl", "start", "smiley.service"])
+                continue
             if not paused:
                 player.move(key)
 
-    game_thread.join()
+        if not paused:
+            if random.random() < 0.1 and (len(obstacles) == 0 or last_obstacle_x - obstacles[-1].x >= 2):
+                new_obstacle = Obstacle()
+                if random.random() < 0.2:
+                    new_obstacle.type = 'bonus'
+                obstacles.append(new_obstacle)
+                last_obstacle_x = new_obstacle.x
+
+            for obstacle in obstacles:
+                obstacle.move()
+                if (obstacle.y == 0 and obstacle.x == 0) or (obstacle.y == 1 and obstacle.x == 1):
+                    obstacles.remove(obstacle)
+                    if obstacle.type == 'obstacle':
+                        score += 1
+                if obstacle.x == player.x and obstacle.y == player.y:
+                    if obstacle.type == 'bonus':
+                        score += random.randint(2, 5)
+                        obstacles.remove(obstacle)
+                    else:
+                        lives -= 1
+                        obstacles.remove(obstacle)
+                        if lives == 0:
+                            game_over = True
+
+            time.sleep(speed)
+            lcd.clear()
+            display_status()
+            player.update()
+            for obstacle in obstacles:
+                obstacle.update()
+
     lcd.clear()
     if score > best_score:
         best_score = score
@@ -220,22 +215,4 @@ def game(best_score):
     else:
         lcd.write_string(f'Game Over!\r\nScore: {score}')
     time.sleep(3)
-    return best_score
 
-# Основная функция
-def main():
-    best_score = 0
-    while True:
-        best_score = game(best_score)
-        lcd.clear()
-        lcd.write_string('Press any key\r\nto restart')
-        while not get_key():
-            time.sleep(0.1)
-        lcd.clear()
-
-try:
-    main()
-except KeyboardInterrupt:
-    lcd.clear()
-    lcd.close(clear=True)
-    GPIO.cleanup()

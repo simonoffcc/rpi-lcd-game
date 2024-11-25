@@ -1,0 +1,8 @@
+[Unit]
+Description=Display Smiley LCD
+
+[Service]
+ExecStart=/home/simon/rpi-lcd-game/env/bin/python home/simon/rpi-lcd-game/src/smile.py
+
+[Install]
+WantedBy=multi-user.target
