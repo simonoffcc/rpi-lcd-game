@@ -2,6 +2,7 @@ import time
 import random
 import RPi.GPIO as GPIO
 from RPLCD.i2c import CharLCD
+import psutil  # Импортируем библиотеку psutil для мониторинга системы
 
 GPIO.setwarnings(False)
 
@@ -122,6 +123,18 @@ class Obstacle:
         self.update()
 
 
+def display_system_status():
+    # Получаем информацию о загрузке процессора и памяти
+    cpu_usage = psutil.cpu_percent()
+    memory = psutil.virtual_memory()
+    memory_usage = memory.percent
+
+    lcd.cursor_pos = (0, 0)
+    lcd.write_string(f'CPU: {cpu_usage}%')
+    lcd.cursor_pos = (1, 0)
+    lcd.write_string(f'Mem: {memory_usage}%')
+
+
 def game(best_score):
     player = Player()
     obstacles = []
@@ -148,14 +161,19 @@ def game(best_score):
             if key == 'pause':
                 paused = not paused
                 if paused:
-                    lcd.cursor_pos = (0, 0)
-                    lcd.write_string('Paused')
-                else:
-                    lcd.clear()
-                    player.update()
-                    for obstacle in obstacles:
-                        obstacle.update()
-                    display_status()
+                    lcd.clear()  # Очистить экран, чтобы показать данные о системе
+                    while paused:  # Пока игра на паузе, показываем системную информацию
+                        display_system_status()  # Отображаем информацию о загрузке процессора и памяти
+                        time.sleep(1)  # Обновляем данные каждую секунду
+                        key = get_key()  # Проверяем, не снята ли пауза
+                        if key == 'pause':
+                            paused = False  # Снимаем паузу, если игрок нажал кнопку
+                            lcd.clear()  # Очистим экран перед возобновлением игры
+                            display_status()  # Покажем текущий статус игры
+                            player.update()
+                            for obstacle in obstacles:
+                                obstacle.update()
+                            break  # Прерываем цикл, продолжаем игру
                 continue
             if key == 'ee':
                 paused = not paused
